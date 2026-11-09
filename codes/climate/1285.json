@@ -1,7 +1,9 @@
 {
    "manufacturer":"Fujitsu",
    "supportedModels":[
-      "AR-RCE1E"
+      "AR-RCE1E",
+      "AR-REG1U with AGU9RLF",
+      "AR-PZ2"
    ],
    "supportedController":"Broadlink",
    "commandsEncoding":"Base64",

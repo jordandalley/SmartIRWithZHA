@@ -3,7 +3,7 @@
 </p>
 
 For this platform to work, we need a .json file containing all the necessary IR commands.
-Find your device's brand code [here](MEDIA_PLAYER.md#available-codes-for-tv-devices) and add the number in the `device_code` field. The compoenent will download it to the correct folder. If your device is not working, you will need to learn your own codes and place the .json file in `smartir/codes/media_player/` subfolders. Please note that the `device_code` field only accepts positive numbers. The .json extension is not required.
+Find your device's brand code [here](MEDIA_PLAYER.md#available-codes-for-tv-devices) and add the number in the `device_code` field. The component will download it to the correct folder. If your device is not working, you will need to learn your own codes and place the .json file in `smartir/codes/media_player/` subfolders. Please note that the `device_code` field only accepts positive numbers. The .json extension is not required.
 
 ## Configuration variables:
 **name** (Optional): The name of the device<br />
@@ -144,11 +144,14 @@ Contributing to your own code files is welcome. However, we do not accept incomp
 | ------------- | -------------------------- | ------------- |
 [1000](../codes/media_player/1000.json)|26PFL560H|Broadlink
 [1001](../codes/media_player/1001.json)|42PFL3007H/60<br>37PF9641D/10|Broadlink
+[1002](../codes/media_player/1002.json)|47PFG4109/77|Broadlink
+[1003](../codes/media_player/1003.json)|32PFS6908/12|Broadlink
 
 #### Sony
 | Code | Supported Models | Controller |
 | ------------- | -------------------------- | ------------- |
 [1020](../codes/media_player/1020.json)|KDL-46HX800|Broadlink
+[7020](../codes/media_player/7020.json)|KDL-46EX620|ESPHome
 
 #### LG
 | Code | Supported Models | Controller |
@@ -186,6 +189,7 @@ Contributing to your own code files is welcome. However, we do not accept incomp
 [1121](../codes/media_player/1121.json)|Yamaha RX-V375 and others (RAV463/ZA113500 remote)|Broadlink
 [1122](../codes/media_player/1122.json)|VR50590 remote|Broadlink
 [1123](../codes/media_player/1123.json)|AS201|Broadlink
+[1124](../codes/media_player/1124.json)|YAS-109|Broadlink
 
 #### RME
 | Code | Supported Models | Controller |
@@ -248,7 +252,7 @@ Contributing to your own code files is welcome. However, we do not accept incomp
 #### Optoma
 | Code | Supported Models | Controller |
 | ------------- | -------------------------- | ------------- |
-[1360](../codes/media_player/1360.json)| HD27 |Broadlink
+[1360](../codes/media_player/1360.json)| HD27 (sends the off command twice for confirmation) |Broadlink
 
 #### Xiaomi
 | Code | Supported Models | Controller |
@@ -264,6 +268,7 @@ Contributing to your own code files is welcome. However, we do not accept incomp
 | Code | Supported Models | Controller |
 | ------------- | -------------------------- | ------------- |
 [1420](../codes/media_player/1420.json)| Cinema SB160 |Broadlink
+[1421](../codes/media_player/1421.json)| JBL Bar 2.0 All-in-One |Broadlink
 
 #### Andersson
 | Code | Supported Models | Controller |
@@ -310,3 +315,22 @@ Contributing to your own code files is welcome. However, we do not accept incomp
 | Code | Supported Models | Controller |
 | ------------- | -------------------------- | ------------- |
 [1580](../codes/media_player/1580.json)| J-103BF |Broadlink
+
+#### Kivi
+| Code | Supported Models | Controller |
+| ------------- | -------------------------- | ------------- |
+[1600](../codes/media_player/1600.json)| 40F600GU |Broadlink
+
+#### Sharp
+| Code | Supported Models | Controller |
+| ------------- | -------------------------- | ------------- |
+[1620](../codes/media_player/1620.json)|LC-32LE700E<br>LC-32LE700S<br>LC-40LE700E<br>LC-40LE700S<br>LC-46LE700E<br>LC-46LE700S<br>LC-52LE700E<br>LC-52LE700S<br>LC-32LX700E<br>LC-40LX700E<br>LC-46LX700E<br>LC-32LU700E<br>LC-32LU700S<br>LC-40LU700E<br>LC-40LU700S<br>LC-46LU700E<br>LC-46LU700S<br>LC-32LE705E<br>LC-32LE705S<br>LC-40LE705E<br>LC-40LE705S<br>LC-46LE705E<br>LC-46LE705S<br>LC-52LE705E<br>LC-52LE705S<br>LC-32LX705E<br>LC-40LX705E<br>LC-46LX705E<br>LC-32LU705E<br>LC-32LU705S<br>LC-40LU705E<br>LC-40LU705S<br>LC-46LU705E<br>LC-46LU705S |Broadlink
+
+| Code | Supported Models | Controller |
+| ------------- | -------------------------- | ------------- |
+[1640](../codes/media_player/1640.json)| 32LC818H |Broadlink
+
+#### Denon
+| Code | Supported Models | Controller |
+| ------------- | -------------------------- | ------------- |
+[1660](../codes/media_player/1660.json)| AVR-X2200W<br>RC-1192 | Broadlink

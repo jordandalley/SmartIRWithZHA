@@ -1,5 +1,5 @@
 import asyncio
-import anyio
+import aiofiles
 import json
 import logging
 import os.path
@@ -12,6 +12,7 @@ from homeassistant.components.climate import (
     PLATFORM_SCHEMA,
 )
 from homeassistant.components.climate.const import (
+    ClimateEntityFeature,
     HVACMode,
     HVAC_MODES,
     ATTR_HVAC_MODE,
@@ -27,8 +28,8 @@ from homeassistant.const import (
     PRECISION_HALVES,
     PRECISION_WHOLE,
 )
-from homeassistant.core import callback
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.core import Event, EventStateChangedData, callback
+from homeassistant.helpers.event import async_track_state_change_event
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.restore_state import RestoreEntity
 from . import COMPONENT_ABS_DIR, Helper
@@ -48,7 +49,12 @@ CONF_HUMIDITY_SENSOR = "humidity_sensor"
 CONF_POWER_SENSOR = "power_sensor"
 CONF_POWER_SENSOR_RESTORE_STATE = "power_sensor_restore_state"
 
-SUPPORT_FLAGS = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.FAN_MODE | ClimateEntityFeature.TURN_OFF | ClimateEntityFeature.TURN_ON
+SUPPORT_FLAGS = (
+    ClimateEntityFeature.TURN_OFF |
+    ClimateEntityFeature.TURN_ON |
+    ClimateEntityFeature.TARGET_TEMPERATURE |
+    ClimateEntityFeature.FAN_MODE
+)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -67,7 +73,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the IR Climate platform."""
-    _LOGGER.debug("Setting up the startir platform")
+    _LOGGER.debug("Setting up the smartir platform")
     device_code = config.get(CONF_DEVICE_CODE)
     device_files_subdir = os.path.join("codes", "climate")
     device_files_absdir = os.path.join(COMPONENT_ABS_DIR, device_files_subdir)
@@ -101,14 +107,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             )
             return
 
-    async with await anyio.open_file(device_json_path) as j:
-        try:
+    try:
+        async with aiofiles.open(device_json_path, mode='r') as j:
             _LOGGER.debug(f"loading json file {device_json_path}")
-            device_data = json.loads(await j.read())
+            content = await j.read()
+            device_data = json.loads(content)
             _LOGGER.debug(f"{device_json_path} file loaded")
-        except Exception:
-            _LOGGER.error("The device Json file is invalid")
-            return
+    except Exception:
+        _LOGGER.error("The device JSON file is invalid")
+        return
 
     async_add_entities([SmartIRClimate(hass, config, device_data)])
 
@@ -140,9 +147,9 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
         valid_hvac_modes = [x for x in device_data["operationModes"] if x in HVAC_MODES]
 
         self._operation_modes = [HVACMode.OFF] + valid_hvac_modes
-        self._fan_modes = device_data["fanModes"]
-        self._swing_modes = device_data.get("swingModes")
-        self._commands = device_data["commands"]
+        self._fan_modes = device_data['fanModes']
+        self._swing_modes = device_data.get('swingModes')
+        self._commands = device_data['commands']
 
         self._target_temperature = self._min_temperature
         self._hvac_mode = HVACMode.OFF
@@ -197,7 +204,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
                 self._last_on_operation = last_state.attributes["last_on_operation"]
 
         if self._temperature_sensor:
-            async_track_state_change(
+            async_track_state_change_event(
                 self.hass, self._temperature_sensor, self._async_temp_sensor_changed
             )
 
@@ -206,7 +213,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
                 self._async_update_temp(temp_sensor_state)
 
         if self._humidity_sensor:
-            async_track_state_change(
+            async_track_state_change_event(
                 self.hass, self._humidity_sensor, self._async_humidity_sensor_changed
             )
 
@@ -215,7 +222,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
                 self._async_update_humidity(humidity_sensor_state)
 
         if self._power_sensor:
-            async_track_state_change(
+            async_track_state_change_event(
                 self.hass, self._power_sensor, self._async_power_sensor_changed
             )
 
@@ -396,7 +403,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
                 target_temperature = "{0:g}".format(self._target_temperature)
 
                 if operation_mode.lower() == HVACMode.OFF:
-                    await self._controller.send(self._commands["off"])
+                    await self._controller.send(self._commands['off'])
                     return
 
                 if "on" in self._commands:
@@ -417,24 +424,34 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
             except Exception as e:
                 _LOGGER.exception(e)
 
-    async def _async_temp_sensor_changed(self, entity_id, old_state, new_state):
+    @callback
+    async def _async_temp_sensor_changed(self, event: Event[EventStateChangedData]) -> None:
         """Handle temperature sensor changes."""
+        new_state = event.data["new_state"]
+
         if new_state is None:
             return
 
         self._async_update_temp(new_state)
         self.async_write_ha_state()
 
-    async def _async_humidity_sensor_changed(self, entity_id, old_state, new_state):
+    @callback
+    async def _async_humidity_sensor_changed(self, event: Event[EventStateChangedData]) -> None:
         """Handle humidity sensor changes."""
+        new_state = event.data["new_state"]
+
         if new_state is None:
             return
 
         self._async_update_humidity(new_state)
         self.async_write_ha_state()
 
-    async def _async_power_sensor_changed(self, entity_id, old_state, new_state):
-        """Handle power sensor changes."""
+    @callback
+    async def _async_power_sensor_changed(self, event: Event[EventStateChangedData]) -> None:
+        entity_id = event.data["entity_id"]
+        old_state = event.data["old_state"]
+        new_state = event.data["new_state"]
+
         if new_state is None:
             return
 
